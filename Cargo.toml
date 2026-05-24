@@ -20,6 +20,13 @@ publish.workspace = true
 name = "duckdb_ip_extension"
 crate-type = ["cdylib", "rlib"]
 
+# Staticlib entry for the wasm build (consumed by `cargo build --target
+# wasm32-unknown-emscripten --example duckdb_ip_extension`, then emcc links it).
+[[example]]
+name = "duckdb_ip_extension"
+crate-type = ["staticlib"]
+path = "src/wasm_lib.rs"
+
 [features]
 default = ["inet-interop"]
 # Enables integration tests that link libduckdb (via `quack-rs/bundled-test`).
@@ -32,7 +39,9 @@ inet-interop = []
 libduckdb-sys.workspace = true
 quack-rs.workspace = true
 
-[dev-dependencies]
+# Scoped to non-wasm32: `cargo build --example` activates dev-deps even when
+# unused, slowing the wasm build with rlibs that never link into the .wasm.
+[target.'cfg(not(target_arch = "wasm32"))'.dev-dependencies]
 criterion.workspace = true
 proptest.workspace = true
 

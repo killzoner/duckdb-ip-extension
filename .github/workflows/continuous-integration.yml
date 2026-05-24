@@ -13,10 +13,17 @@ env:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - macos-latest
+          # - windows-latest  # disabled for now
     concurrency:
       cancel-in-progress: true
-      group: ${{ github.workflow }}-build-${{ github.event.pull_request.number || github.ref }}
+      group: ${{ github.workflow }}-build-${{ github.event.pull_request.number || github.ref }}-${{ matrix.os }}
     steps:
       - uses: actions/checkout@v6
       - uses: dtolnay/rust-toolchain@stable
@@ -128,3 +135,33 @@ jobs:
           components: miri
       - run: cargo +nightly miri setup
       - run: cargo +nightly miri test --lib
+  wasm:
+    runs-on: ubuntu-latest
+    # Override the workflow-level DUCKDB_DOWNLOAD_LIB: there's no prebuilt
+    # libduckdb for wasm32, and our `loadable-extension` build doesn't link
+    # libduckdb anyway. libduckdb-sys treats "" as "don't download" (only
+    # "1"/"true" trigger the download).
+    env:
+      DUCKDB_DOWNLOAD_LIB: ""
+    concurrency:
+      cancel-in-progress: true
+      group: ${{ github.workflow }}-wasm-${{ github.event.pull_request.number || github.ref }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: true
+          fetch-depth: 1
+      - uses: mymindstorm/setup-emsdk@v16
+        with:
+          version: 5.0.5
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-emscripten
+      - name: Configure CI
+        run: make configure_ci
+      - name: Build WASM (MVP)
+        run: make wasm_mvp
+      - name: Build WASM (EH)
+        run: make wasm_eh
+      - name: Build WASM (Threads)
+        run: make wasm_threads

@@ -31,6 +31,9 @@ DUCKDB_PLATFORM    ?= linux_amd64
 PROFILE            ?= release
 OUTPUT_FILE        ?= $(EXTENSION_NAME).duckdb_extension
 
+# Required for extension-ci-tools sub-makefiles
+TARGET_DUCKDB_VERSION := $(DUCKDB_API_VERSION)
+
 # Cargo writes the `dev` profile to target/debug/, not target/dev/.
 ifeq ($(PROFILE),dev)
   CARGO_PROFILE_DIR := debug
@@ -41,6 +44,23 @@ endif
 ifneq ("$(wildcard /.dockerenv)","")
     DOCKER=
 endif
+
+# --- Include DuckDB Extension Makefiles for WASM + multi-arch release support ---
+# These provide: configure, wasm_mvp, wasm_eh, wasm_threads, release, debug.
+# Soft `-include`: a missing/uninitialized submodule only disables these targets
+# rather than breaking unrelated ones (fmt, check-duckdb-pins).
+-include extension-ci-tools/makefiles/c_api_extensions/base.Makefile
+-include extension-ci-tools/makefiles/c_api_extensions/rust.Makefile
+
+# --- Official DuckDB Template Glue Targets ---
+.PHONY: configure
+configure: venv platform extension_version
+
+.PHONY: release
+release: build_extension_library_release build_extension_with_metadata_release
+
+.PHONY: debug
+debug: build_extension_library_debug build_extension_with_metadata_debug
 
 .PHONY: fmt
 fmt: ## format files

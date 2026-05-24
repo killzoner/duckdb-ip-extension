@@ -6,31 +6,17 @@ on:
 
 jobs:
   build:
-    name: Build (${{ matrix.duckdb_arch }})
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - duckdb_arch: linux_amd64
-            runner: ubuntu-24.04
-          - duckdb_arch: linux_arm64
-            runner: ubuntu-24.04-arm
-    runs-on: ${{ matrix.runner }}
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          submodules: true # extension-ci-tools, for append_extension_metadata.py
-      - uses: dtolnay/rust-toolchain@stable
-      - name: Build extension
-        run: |
-          make build-extension \
-            DUCKDB_PLATFORM=${{ matrix.duckdb_arch }} \
-            EXTENSION_VERSION=${{ github.ref_name }} \
-            OUTPUT_FILE=duckdb_ip_extension-${{ matrix.duckdb_arch }}.duckdb_extension
-      - uses: actions/upload-artifact@v7
-        with:
-          name: duckdb_ip_extension-${{ matrix.duckdb_arch }}
-          path: duckdb_ip_extension-${{ matrix.duckdb_arch }}.duckdb_extension
+    name: Build
+    uses: duckdb/extension-ci-tools/.github/workflows/_extension_distribution.yml@main
+    with:
+      extension_name: duckdb_ip_extension
+      duckdb_version: v1.2.0
+      # Must match the ref of `_extension_distribution.yml@main` above; v1.2.0
+      # predates the `scripts/extbuild/go.mod` the matrix-generation job needs.
+      ci_tools_version: main
+      # Installs Rust on each matrix runner; without this, `cargo` is missing.
+      extra_toolchains: "rust"
+    secrets: inherit
 
   release:
     name: Attach artifacts to GitHub Release
@@ -45,5 +31,5 @@ jobs:
           merge-multiple: true
       - uses: softprops/action-gh-release@v3
         with:
-          files: artifacts/*.duckdb_extension
+          files: artifacts/**/*.duckdb_extension*
           fail_on_unmatched_files: true

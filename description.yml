@@ -1,0 +1,14 @@
+extension:
+  name: duckdb_ip_extension
+  description: IPv4/IPv6 address utilities for DuckDB (binary conversion, global checks)
+  version: 0.1.0
+  language: Rust
+  build: cargo
+  license: MIT OR Apache-2.0
+  requires_toolchains: rust;python3
+  maintainers:
+    - killzoner
+
+repo:
+  github: killzoner/duckdb-ip-extension
+  ref: master
