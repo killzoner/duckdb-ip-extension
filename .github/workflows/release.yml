@@ -1,0 +1,49 @@
+name: Extension Release
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  build:
+    name: Build (${{ matrix.duckdb_arch }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - duckdb_arch: linux_amd64
+            runner: ubuntu-24.04
+          - duckdb_arch: linux_arm64
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: true # extension-ci-tools, for append_extension_metadata.py
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Build extension
+        run: |
+          make build-extension \
+            DUCKDB_PLATFORM=${{ matrix.duckdb_arch }} \
+            EXTENSION_VERSION=${{ github.ref_name }} \
+            OUTPUT_FILE=duckdb_ip_extension-${{ matrix.duckdb_arch }}.duckdb_extension
+      - uses: actions/upload-artifact@v7
+        with:
+          name: duckdb_ip_extension-${{ matrix.duckdb_arch }}
+          path: duckdb_ip_extension-${{ matrix.duckdb_arch }}.duckdb_extension
+
+  release:
+    name: Attach artifacts to GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          path: artifacts
+          merge-multiple: true
+      - uses: softprops/action-gh-release@v3
+        with:
+          files: artifacts/*.duckdb_extension
+          fail_on_unmatched_files: true

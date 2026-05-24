@@ -1,0 +1,8 @@
+target
+/build
+/local_lib
+.DS_Store
+.cache
+taplo
+*.duckdb_extension
+configure

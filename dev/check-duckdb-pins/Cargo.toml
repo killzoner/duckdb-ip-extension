@@ -1,0 +1,7 @@
+[package]
+name = "check-duckdb-pins"
+edition = "2024"
+publish = false
+
+[dependencies]
+toml.workspace = true

@@ -1,0 +1,60 @@
+[workspace]
+members = ["dev/check-duckdb-pins"]
+
+[package]
+name = "duckdb-ip-extension"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.87.0"
+description = "DuckDB IP parsing extension"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/killzoner/duckdb-ip-extension"
+keywords = ["duckdb", "ipv4", "ipv6", "network", "extension"]
+publish = false
+
+[lib]
+name = "duckdb_ip_extension"
+crate-type = ["cdylib", "rlib"]
+
+[features]
+default = ["inet-interop"]
+# Enables integration tests that link libduckdb (via `quack-rs/bundled-test`).
+bundled-test = ["quack-rs/bundled-test"]
+# Registers scalar functions taking the duckdb-inet INET type as input.
+# `duckdb-inet` must be loaded before this extension at runtime.
+inet-interop = []
+
+[dependencies]
+libduckdb-sys.workspace = true
+quack-rs.workspace = true
+
+[dev-dependencies]
+criterion.workspace = true
+proptest.workspace = true
+
+[[bench]]
+name = "ip_bench"
+harness = false
+required-features = ["bundled-test", "inet-interop"]
+
+[profile.release]
+panic = "abort"
+opt-level = 3
+lto = true
+codegen-units = 1
+strip = true
+
+[lints.rust]
+unsafe_op_in_unsafe_fn = "deny"
+
+[workspace.dependencies]
+libduckdb-sys = { version = ">=1.10503, <2", default-features = false, features = [
+  "loadable-extension",
+] }
+quack-rs = { version = "0.13", git = "https://github.com/killzoner/quack-rs.git", branch = "feat/bundled-test-prebuilt-libduckdb", default-features = false }
+criterion = { version = "0.8", default-features = false }
+proptest = { version = "1", default-features = false, features = ["std"] }
+toml = { version = "1.1", default-features = false, features = [
+  "parse",
+  "serde",
+] }
