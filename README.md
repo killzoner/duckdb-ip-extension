@@ -15,6 +15,7 @@ Built in pure Rust on [`quack-rs`](https://github.com/tomtom215/quack-rs) and Du
 ## Usage
 
 ```bash
+git submodule update --init
 make build-extension
 ```
 
@@ -66,6 +67,7 @@ Requires `duckdb-inet` to be loaded **before** this extension at runtime so the 
 Artifacts are attached to GitHub Releases for `linux_amd64` and `linux_arm64`. To build locally:
 
 ```bash
+git submodule update --init
 make build-extension  # Produces duckdb_ip_extension.duckdb_extension
 ```
 
