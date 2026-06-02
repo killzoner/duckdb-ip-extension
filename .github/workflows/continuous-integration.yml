@@ -37,8 +37,9 @@ jobs:
       - run: cargo clippy --all --all-targets --all-features -- -D warnings
       - uses: taiki-e/install-action@v2
         with:
-          tool: cargo-shear
+          tool: cargo-shear,cargo-neat
       - run: cargo shear
+      - run: cargo neat -m -p -f --package-workspace-meta-values rust-version,edition,license,homepage,repository,publish
   test:
     runs-on: ubuntu-latest
     concurrency:

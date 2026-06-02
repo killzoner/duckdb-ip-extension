@@ -1,16 +1,20 @@
 [workspace]
 members = ["dev/check-duckdb-pins"]
+package.edition = "2024"
+package.rust-version = "1.87.0"
+package.license = "MIT OR Apache-2.0"
+package.repository = "https://github.com/killzoner/duckdb-ip-extension"
+package.publish = false
 
 [package]
 name = "duckdb-ip-extension"
 version = "0.1.0"
-edition = "2024"
-rust-version = "1.87.0"
+edition.workspace = true
+rust-version.workspace = true
 description = "DuckDB IP parsing extension"
-license = "MIT OR Apache-2.0"
-repository = "https://github.com/killzoner/duckdb-ip-extension"
+license.workspace = true
 keywords = ["duckdb", "ipv4", "ipv6", "network", "extension"]
-publish = false
+publish.workspace = true
 
 [lib]
 name = "duckdb_ip_extension"
