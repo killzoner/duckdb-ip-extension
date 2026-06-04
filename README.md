@@ -40,27 +40,29 @@ duckdb -unsigned -c "
 
 ## Functions
 
-| SQL function | Signature | Behavior |
+| SQL function | Signature | Returns |
 |---|---|---|
-| `ipv4_to_binary(addr)` | `VARCHAR → BLOB` | 4-byte big-endian IPv4 representation. Returns `NULL` for IPv6 or unparseable input. |
-| `ipv6_to_binary(addr)` | `VARCHAR → BLOB` | 16-byte big-endian IPv6 representation. Returns `NULL` for IPv4 addresses or unparseable input. |
-| `ip_to_binary(addr)` | `VARCHAR → BLOB` | Family-agnostic: 4 bytes for IPv4, 16 bytes for IPv6. Returns `NULL` for unparseable input. Pair with `ip_family` to disambiguate. |
-| `ip_family(addr)` | `VARCHAR → UTINYINT` | `4` for IPv4, `6` for IPv6. Returns `NULL` for unparseable input. |
-| `is_global_ipv4(addr)` | `VARCHAR → BOOLEAN` | True if the input is a globally-routable unicast IPv4 address (excludes `0.0.0.0/8` "this network", RFC 1918 private, `100.64.0.0/10` CGNAT, `127/8` loopback, `169.254/16` link-local, `192.0.0.0/24` IETF protocol assignments, `192.0.2/24` + `198.51.100/24` + `203.0.113/24` documentation, `198.18.0.0/15` benchmarking, `224.0.0.0/4` multicast, `240.0.0.0/4` reserved/Class E, `255.255.255.255` broadcast). Returns `NULL` for non-IPv4 or unparseable input. |
-| `is_global_ipv6(addr)` | `VARCHAR → BOOLEAN` | True if the input is a globally-routable IPv6 address (excludes `::` unspecified, `::1` loopback, `ff00::/8` multicast, `fe80::/10` link-local unicast, `fc00::/7` unique local, `2001:db8::/32` documentation, `::ffff:0:0/96` IPv4-mapped). Returns `NULL` for non-IPv6 or unparseable input. |
+| `ipv4_to_binary(addr)` | `VARCHAR → BLOB` | 4-byte big-endian IPv4 |
+| `ipv6_to_binary(addr)` | `VARCHAR → BLOB` | 16-byte big-endian IPv6 |
+| `ip_to_binary(addr)` | `VARCHAR → BLOB` | 4 or 16 bytes depending on family (pair with `ip_family`) |
+| `ip_family(addr)` | `VARCHAR → UTINYINT` | `4` for IPv4, `6` for IPv6 |
+| `is_global_ipv4(addr)` | `VARCHAR → BOOLEAN` | true if globally-routable unicast IPv4 |
+| `is_global_ipv6(addr)` | `VARCHAR → BOOLEAN` | true if globally-routable IPv6 |
 
-All functions accept the full IPv6 string grammar (canonical form, `::` shorthand, IPv4-mapped `::ffff:a.b.c.d`).
+All functions return `NULL` for unparseable input or a family mismatch (e.g. IPv6 passed to `ipv4_to_binary`). The exact reserved ranges excluded by the `is_global_*` checks are documented in the doc comments in [`src/ip/mod.rs`](./src/ip/mod.rs).
 
 ### INET interop
 
-The `inet-interop` Cargo feature is **enabled by default** and additionally registers:
+The `inet-interop` Cargo feature (enabled by default) additionally registers:
 
-| SQL function | Signature | Behavior |
+| SQL function | Signature | Returns |
 |---|---|---|
-| `inet_to_binary(addr)` | `INET → BLOB` | 4 bytes for IPv4-family INET, 16 bytes for IPv6-family. Returns `NULL` for invalid family. |
-| `is_global_inet(addr)` | `INET → BOOLEAN` | Dispatches on the INET's family: applies `is_global_ipv4` or `is_global_ipv6` semantics. Returns `NULL` for invalid family. |
+| `inet_to_binary(addr)` | `INET → BLOB` | 4 or 16 bytes depending on the INET's family |
+| `is_global_inet(addr)` | `INET → BOOLEAN` | `is_global_ipv4` / `is_global_ipv6` semantics by family |
 
-Requires `duckdb-inet` to be loaded **before** this extension at runtime so the INET type is registered when `inet_to_binary` registers itself. Opt out with `cargo build --no-default-features` if you don't need the INET-input variants.
+Both return `NULL` for an invalid INET family. Details in [`src/inet/mod.rs`](./src/inet/mod.rs).
+
+Requires `duckdb-inet` to be loaded **before** this extension at runtime. Opt out with `cargo build --no-default-features`.
 
 ## Building from source
 

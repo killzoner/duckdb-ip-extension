@@ -6,6 +6,7 @@ DOCKER     ?= docker compose run \
 		-e"USER=${USER}" \
 		-e"WORKDIR=${WORKDIR}" \
 		-e"LOCALPATH=${LOCALPATH}" \
+		-e"DUCKDB_DOWNLOAD_LIB=${DUCKDB_DOWNLOAD_LIB}" \
 		--volume="/etc/passwd:/etc/passwd" \
 		--volume="/etc/shadow:/etc/shadow" \
 		--volume="/etc/group:/etc/group" \
@@ -19,6 +20,9 @@ WORKDIR    ?= /workdir
 LIB_LOCAL_DIR      ?= local_lib
 LIB_DUCKDB_ARCH    ?= linux-amd64
 LIB_DUCKDB_VERSION ?= 1.5.3
+
+DUCKDB_DOWNLOAD_LIB ?= 1
+export DUCKDB_DOWNLOAD_LIB
 
 EXTENSION_NAME     ?= duckdb_ip_extension
 EXTENSION_VERSION  ?= v0.1.0
@@ -50,6 +54,7 @@ lint: ## format files
 	@$(DOCKER) sh -c '\
 		cargo clippy --all --all-targets --all-features -- -D warnings ; \
 		cargo shear ; \
+		cargo neat -m -p -f --package-workspace-meta-values rust-version,edition,license,homepage,repository,publish ; \
 	'
 
 .PHONY: shell
