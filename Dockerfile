@@ -9,7 +9,7 @@ RUN set -eux && \
   rustup component add clippy && \
   rm Makefile && \
   cargo install taplo-cli@0.9.3 && \
-  cargo install cargo-machete && \
+  cargo install cargo-shear cargo-neat && \
   rustup component add rustfmt && \
   rm -rf /var/lib/apt/lists/* && \
   export version=24.0.6 && \
