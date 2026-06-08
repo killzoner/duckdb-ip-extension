@@ -1429,8 +1429,9 @@ dependencies = [
 
 [[package]]
 name = "quack-rs"
-version = "0.13.0"
-source = "git+https://github.com/killzoner/quack-rs.git?branch=feat%2Fbundled-test-prebuilt-libduckdb#898f8f2df37dcfe1b34be94414eb94ed081560f3"
+version = "0.14.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "72a540873815f6072ac20b6b07591370ff5f3ecfa2f76c5ee14900b2aeb694be"
 dependencies = [
  "cc",
  "duckdb",
