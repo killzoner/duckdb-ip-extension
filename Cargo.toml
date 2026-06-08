@@ -23,7 +23,7 @@ crate-type = ["cdylib", "rlib"]
 [features]
 default = ["inet-interop"]
 # Enables integration tests that link libduckdb (via `quack-rs/bundled-test`).
-bundled-test = ["quack-rs/bundled-test"]
+bundled-test = ["quack-rs/bundled-test-prebuilt"]
 # Registers scalar functions taking the duckdb-inet INET type as input.
 # `duckdb-inet` must be loaded before this extension at runtime.
 inet-interop = []
@@ -55,7 +55,7 @@ unsafe_op_in_unsafe_fn = "deny"
 libduckdb-sys = { version = ">=1.10503, <2", default-features = false, features = [
   "loadable-extension",
 ] }
-quack-rs = { version = "0.13", git = "https://github.com/killzoner/quack-rs.git", branch = "feat/bundled-test-prebuilt-libduckdb", default-features = false }
+quack-rs = { version = "0.14", default-features = false }
 criterion = { version = "0.8", default-features = false }
 proptest = { version = "1", default-features = false, features = ["std"] }
 toml = { version = "1.1", default-features = false, features = [
