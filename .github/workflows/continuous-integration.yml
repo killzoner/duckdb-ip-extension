@@ -18,7 +18,7 @@ jobs:
       cancel-in-progress: true
       group: ${{ github.workflow }}-build-${{ github.event.pull_request.number || github.ref }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: stable
@@ -29,7 +29,7 @@ jobs:
       cancel-in-progress: true
       group: ${{ github.workflow }}-lint-${{ github.event.pull_request.number || github.ref }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: stable
@@ -46,7 +46,7 @@ jobs:
       cancel-in-progress: true
       group: ${{ github.workflow }}-test-${{ github.event.pull_request.number || github.ref }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           submodules: true # extension-ci-tools, used by `make build-extension`
           fetch-depth: 1
@@ -59,7 +59,7 @@ jobs:
       cancel-in-progress: true
       group: ${{ github.workflow }}-fmt-${{ github.event.pull_request.number || github.ref }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: stable
@@ -78,7 +78,7 @@ jobs:
       cancel-in-progress: true
       group: ${{ github.workflow }}-version-sync-${{ github.event.pull_request.number || github.ref }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: stable
@@ -92,7 +92,7 @@ jobs:
       cancel-in-progress: true
       group: ${{ github.workflow }}-feature-check-${{ github.event.pull_request.number || github.ref }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
       - uses: taiki-e/install-action@v2
         with:
@@ -104,7 +104,7 @@ jobs:
       cancel-in-progress: true
       group: ${{ github.workflow }}-cargo-deny-checks-${{ github.event.pull_request.number || github.ref }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: stable
@@ -121,7 +121,7 @@ jobs:
     env:
       MIRIFLAGS: "-Zmiri-strict-provenance -Zmiri-symbolic-alignment-check"
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@nightly
         with:
           toolchain: nightly
