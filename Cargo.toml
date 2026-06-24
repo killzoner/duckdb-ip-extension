@@ -52,7 +52,7 @@ strip = true
 unsafe_op_in_unsafe_fn = "deny"
 
 [workspace.dependencies]
-libduckdb-sys = { version = ">=1.10503, <2", default-features = false, features = [
+libduckdb-sys = { version = "1.10503", default-features = false, features = [
   "loadable-extension",
 ] }
 quack-rs = { version = "0.14", default-features = false }
