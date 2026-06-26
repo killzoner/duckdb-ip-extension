@@ -5,3 +5,6 @@ publish.workspace = true
 
 [dependencies]
 toml.workspace = true
+
+[dev-dependencies]
+duckdb.workspace = true
