@@ -19,7 +19,7 @@ WORKDIR    ?= /workdir
 
 LIB_LOCAL_DIR      ?= local_lib
 LIB_DUCKDB_ARCH    ?= linux-amd64
-LIB_DUCKDB_VERSION ?= 1.5.4
+LIB_DUCKDB_VERSION ?= 1.5.5
 
 DUCKDB_DOWNLOAD_LIB ?= 1
 export DUCKDB_DOWNLOAD_LIB
