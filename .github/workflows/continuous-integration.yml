@@ -39,7 +39,7 @@ jobs:
         with:
           tool: cargo-shear,cargo-neat
       - run: cargo shear
-      - run: cargo neat -m -p -f --package-workspace-meta-values rust-version,edition,license,homepage,repository,publish
+      - run: cargo neat -m -p -f
   test:
     runs-on: ubuntu-latest
     concurrency:
