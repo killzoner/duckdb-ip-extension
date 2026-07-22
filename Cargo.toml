@@ -52,8 +52,8 @@ strip = true
 unsafe_op_in_unsafe_fn = "deny"
 
 [workspace.dependencies]
-duckdb = { version = "1.10503", default-features = false }
-libduckdb-sys = { version = "1.10503", default-features = false, features = [
+duckdb = { version = "1.10505", default-features = false }
+libduckdb-sys = { version = "1.10505", default-features = false, features = [
   "loadable-extension",
 ] }
 quack-rs = { version = "0.15", default-features = false }
@@ -66,3 +66,13 @@ toml = { version = "1.1", default-features = false, features = [
 
 [workspace.metadata.cargo-shear]
 ignored = ["duckdb"]
+
+[workspace.metadata.cargo-neat]
+package-workspace-meta-values = [
+  "rust-version",
+  "edition",
+  "license",
+  "homepage",
+  "repository",
+  "publish",
+]
