@@ -54,7 +54,7 @@ lint: ## format files
 	@$(DOCKER) sh -c '\
 		cargo clippy --all --all-targets --all-features -- -D warnings ; \
 		cargo shear ; \
-		cargo neat -m -p -f --package-workspace-meta-values rust-version,edition,license,homepage,repository,publish ; \
+		cargo neat -m -p -f ; \
 	'
 
 .PHONY: shell
