@@ -67,7 +67,7 @@ jobs:
       - run: cargo fmt --all
       - uses: taiki-e/install-action@v2
         with:
-          tool: taplo-cli@0.9.3
+          tool: taplo-cli
       - name: Run cargo sort
         run: taplo format
       - name: Check for a diff
@@ -98,6 +98,7 @@ jobs:
         with:
           tool: cargo-hack
       - run: cargo hack check --feature-powerset --workspace
+      - run: cargo hack check --rust-version --workspace
   cargo-deny-checks:
     runs-on: ubuntu-latest
     concurrency:
