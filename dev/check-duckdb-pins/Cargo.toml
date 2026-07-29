@@ -2,6 +2,7 @@
 name = "check-duckdb-pins"
 edition.workspace = true
 publish.workspace = true
+rust-version.workspace = true
 
 [dependencies]
 toml.workspace = true
