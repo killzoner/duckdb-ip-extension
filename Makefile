@@ -27,7 +27,7 @@ DUCKDB_DOWNLOAD_LIB ?= 1
 export DUCKDB_DOWNLOAD_LIB
 
 EXTENSION_NAME     ?= duckdb_ip_extension
-EXTENSION_VERSION  ?= v0.1.0
+EXTENSION_VERSION  ?= v0.2.0
 DUCKDB_API_VERSION ?= v1.2.0
 DUCKDB_PLATFORM    ?= linux_amd64
 PROFILE            ?= release
