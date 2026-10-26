@@ -4,7 +4,7 @@ COPY Makefile .
 
 RUN set -eux && \
   apt update && \
-  apt install --yes --no-install-recommends ca-certificates unzip make && \
+  apt install --yes --no-install-recommends ca-certificates make && \
   echo "deb http://deb.debian.org/debian/ bookworm main non-free" | tee /etc/apt/sources.list && \
   rustup component add clippy && \
   rm Makefile && \

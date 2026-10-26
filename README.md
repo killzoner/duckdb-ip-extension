@@ -92,7 +92,7 @@ DUCKDB_DOWNLOAD_LIB=1 cargo test --features bundled-test
 
 # Option B: Manual setup
 make install_lib_duckdb    # Unpacks into ./local_lib/
-DUCKDB_LIB_DIR=$PWD/local_lib cargo test --features bundled-test
+DUCKDB_LIB_DIR=$PWD/local_lib LD_LIBRARY_PATH=$PWD/local_lib cargo test --features bundled-test
 ```
 
 Rebuild the artifact via `make build-extension` if it's stale relative to `src/`.

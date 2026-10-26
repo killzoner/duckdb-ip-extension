@@ -1,7 +1,7 @@
 [workspace]
 members = ["dev/check-duckdb-pins"]
 package.edition = "2024"
-package.rust-version = "1.87.0"
+package.rust-version = "1.88.0"
 package.license = "MIT OR Apache-2.0"
 package.repository = "https://github.com/killzoner/duckdb-ip-extension"
 package.publish = false
@@ -52,8 +52,11 @@ strip = true
 unsafe_op_in_unsafe_fn = "deny"
 
 [workspace.dependencies]
-duckdb = { version = "1.10506", default-features = false }
-libduckdb-sys = { version = "1.10506", default-features = false, features = [
+duckdb = { version = "1.20000", default-features = false, features = [
+  "download-lib",
+] }
+libduckdb-sys = { version = "1.20000", default-features = false, features = [
+  "download-lib",
   "loadable-extension",
 ] }
 quack-rs = { version = "0.19", default-features = false }

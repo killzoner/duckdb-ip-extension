@@ -19,7 +19,9 @@ WORKDIR    ?= /workdir
 
 LIB_LOCAL_DIR      ?= local_lib
 LIB_DUCKDB_ARCH    ?= linux-amd64
-LIB_DUCKDB_VERSION ?= 1.5.6
+LIB_DUCKDB_VERSION ?= 2.0.0
+# extension-ci-tools has one branch per minor release, named after its codename
+EXTENSION_CI_TOOLS_BRANCH ?= v2.0-cyanoptera
 
 DUCKDB_DOWNLOAD_LIB ?= 1
 export DUCKDB_DOWNLOAD_LIB
@@ -64,9 +66,10 @@ shell: ## start a shell
 .PHONY: install_lib_duckdb
 install_lib_duckdb: ## install duckdb libs
 	sh -c '\
-		curl -LO -fsS https://github.com/duckdb/duckdb/releases/download/v$(LIB_DUCKDB_VERSION)/libduckdb-$(LIB_DUCKDB_ARCH).zip && \
-		unzip -o libduckdb-$(LIB_DUCKDB_ARCH).zip -d $(LIB_LOCAL_DIR) && \
-		rm -f libduckdb-$(LIB_DUCKDB_ARCH).zip ; \
+		curl -LO -fsS https://github.com/duckdb/duckdb/releases/download/v$(LIB_DUCKDB_VERSION)/duckdb-shared-libs-$(LIB_DUCKDB_ARCH).tar.gz && \
+		mkdir -p $(LIB_LOCAL_DIR) && \
+		tar -xzf duckdb-shared-libs-$(LIB_DUCKDB_ARCH).tar.gz -C $(LIB_LOCAL_DIR) && \
+		rm -f duckdb-shared-libs-$(LIB_DUCKDB_ARCH).tar.gz ; \
 	'
 
 .PHONY: build-extension
@@ -85,8 +88,8 @@ update-ci-tools: sync-versions ## sync .gitmodules branch + pull latest on that 
 	git submodule update --init --remote extension-ci-tools
 
 .PHONY: sync-versions
-sync-versions: ## sync .gitmodules submodule branch to LIB_DUCKDB_VERSION
-	git config -f .gitmodules submodule.extension-ci-tools.branch v$(LIB_DUCKDB_VERSION)
+sync-versions: ## sync .gitmodules submodule branch to EXTENSION_CI_TOOLS_BRANCH
+	git config -f .gitmodules submodule.extension-ci-tools.branch $(EXTENSION_CI_TOOLS_BRANCH)
 
 .PHONY: check-duckdb-pins
 check-duckdb-pins: ## verify .gitmodules + Cargo.lock libduckdb-sys are pinned to LIB_DUCKDB_VERSION
