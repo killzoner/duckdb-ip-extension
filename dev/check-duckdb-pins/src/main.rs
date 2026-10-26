@@ -13,7 +13,7 @@ fn main() -> ExitCode {
         eprintln!("usage: check-duckdb-pins <duckdb-version>  (e.g. 1.5.3)");
         return ExitCode::FAILURE;
     };
-    let Some(expected_sys) = expected_sys_minor(&duckdb) else {
+    let Some(version) = parse_version(&duckdb) else {
         eprintln!("expected version like 1.5.3, got {duckdb:?}");
         return ExitCode::FAILURE;
     };
@@ -21,8 +21,8 @@ fn main() -> ExitCode {
     let lock = std::fs::read_to_string("Cargo.lock").expect("read Cargo.lock");
 
     let mut ok = true;
-    ok &= check_submodule_branch(&duckdb);
-    ok &= check_libduckdb_sys(&lock, &expected_sys);
+    ok &= check_submodule_branch(version);
+    ok &= check_libduckdb_sys(&lock, &expected_sys_minor(version));
 
     if ok {
         ExitCode::SUCCESS
@@ -31,28 +31,31 @@ fn main() -> ExitCode {
     }
 }
 
-/// Maps a DuckDB `1.5.X` version to the corresponding `libduckdb-sys` minor
-/// version string (e.g. `1.5.3` → `1.10503`). Returns `None` for malformed
-/// input. The crate's numbering scheme changed at the 1.5.0 release; revisit
-/// when DuckDB moves past 1.5.
-fn expected_sys_minor(duckdb: &str) -> Option<String> {
+/// Parses a DuckDB `X.Y.Z` version. Returns `None` for malformed input.
+fn parse_version(duckdb: &str) -> Option<[u32; 3]> {
     let parts: Vec<u32> = duckdb.split('.').filter_map(|p| p.parse().ok()).collect();
-    let [_, minor, patch] = parts[..] else {
-        return None;
-    };
-    Some(format!("1.10{minor}{patch:02}"))
+    parts.try_into().ok()
 }
 
-fn check_submodule_branch(duckdb: &str) -> bool {
-    let want = format!("v{duckdb}");
+/// Maps a DuckDB version to the corresponding `libduckdb-sys` minor version
+/// string (e.g. `1.5.3` gives `1.10503`, `2.0.0` gives `1.20000`). The crate uses this
+/// numbering scheme since the 1.5.0 release.
+fn expected_sys_minor([major, minor, patch]: [u32; 3]) -> String {
+    format!("1.{major}{minor:02}{patch:02}")
+}
+
+fn check_submodule_branch([major, minor, _]: [u32; 3]) -> bool {
+    let want = format!("v{major}.{minor}-");
     let out = Command::new("git")
         .args(["config", "-f", ".gitmodules", SUBMODULE_KEY])
         .output()
         .expect("invoke git config");
     let got = String::from_utf8_lossy(&out.stdout).trim().to_owned();
-    if got != want {
-        eprintln!("FAIL: .gitmodules {SUBMODULE_KEY} = {got:?}, expected {want:?}");
-        eprintln!("  fix: git config -f .gitmodules {SUBMODULE_KEY} {want}");
+    if !got.starts_with(&want) {
+        eprintln!("FAIL: .gitmodules {SUBMODULE_KEY} = {got:?}, expected {want}<codename>");
+        eprintln!(
+            "  fix: set EXTENSION_CI_TOOLS_BRANCH in the Makefile, then run make sync-versions"
+        );
         return false;
     }
     true
@@ -83,15 +86,21 @@ mod tests {
 
     #[test]
     fn maps_duckdb_to_libduckdb_sys_minor() {
-        assert_eq!(expected_sys_minor("1.5.3").as_deref(), Some("1.10503"));
-        assert_eq!(expected_sys_minor("1.5.10").as_deref(), Some("1.10510"));
+        assert_eq!(expected_sys_minor([1, 5, 3]), "1.10503");
+        assert_eq!(expected_sys_minor([1, 5, 10]), "1.10510");
+        assert_eq!(expected_sys_minor([2, 0, 0]), "1.20000");
+    }
+
+    #[test]
+    fn parses_version() {
+        assert_eq!(parse_version("1.5.10"), Some([1, 5, 10]));
     }
 
     #[test]
     fn rejects_malformed_version() {
-        assert_eq!(expected_sys_minor("v1.5.3"), None);
-        assert_eq!(expected_sys_minor("1.5"), None);
-        assert_eq!(expected_sys_minor("not-a-version"), None);
+        assert_eq!(parse_version("v1.5.3"), None);
+        assert_eq!(parse_version("1.5"), None);
+        assert_eq!(parse_version("not-a-version"), None);
     }
 
     const LOCK_FIXTURE: &str = r#"
