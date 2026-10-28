@@ -26,11 +26,11 @@ jobs:
           make build-extension \
             DUCKDB_PLATFORM=${{ matrix.duckdb_arch }} \
             EXTENSION_VERSION=${{ github.ref_name }} \
-            OUTPUT_FILE=duckdb_ip_extension-${{ matrix.duckdb_arch }}.duckdb_extension
+            OUTPUT_FILE=duckdb_ip_extension.${{ matrix.duckdb_arch }}.duckdb_extension
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: duckdb_ip_extension-${{ matrix.duckdb_arch }}
-          path: duckdb_ip_extension-${{ matrix.duckdb_arch }}.duckdb_extension
+          path: duckdb_ip_extension.${{ matrix.duckdb_arch }}.duckdb_extension
 
   release:
     name: Attach artifacts to GitHub Release
