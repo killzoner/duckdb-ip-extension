@@ -33,7 +33,11 @@ fn main() -> ExitCode {
 
 /// Parses a DuckDB `X.Y.Z` version. Returns `None` for malformed input.
 fn parse_version(duckdb: &str) -> Option<[u32; 3]> {
-    let parts: Vec<u32> = duckdb.split('.').filter_map(|p| p.parse().ok()).collect();
+    let parts: Vec<u32> = duckdb
+        .split('.')
+        .map(str::parse)
+        .collect::<Result<_, _>>()
+        .ok()?;
     parts.try_into().ok()
 }
 
@@ -100,6 +104,7 @@ mod tests {
     fn rejects_malformed_version() {
         assert_eq!(parse_version("v1.5.3"), None);
         assert_eq!(parse_version("1.5"), None);
+        assert_eq!(parse_version("2.0.0.rc1"), None);
         assert_eq!(parse_version("not-a-version"), None);
     }
 
