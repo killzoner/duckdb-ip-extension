@@ -8,7 +8,7 @@ package.publish = false
 
 [package]
 name = "duckdb-ip-extension"
-version = "0.2.0"
+version = "0.2.1"
 edition.workspace = true
 rust-version.workspace = true
 description = "DuckDB IP parsing extension"
