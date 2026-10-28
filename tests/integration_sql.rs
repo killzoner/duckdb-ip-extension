@@ -14,6 +14,8 @@
 
 #![cfg(feature = "bundled-test")]
 
+use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
+
 use quack_rs::testing::InMemoryDb;
 
 const EXTENSION_FILENAME: &str = "duckdb_ip_extension.duckdb_extension";
@@ -213,6 +215,56 @@ fn is_global_ipv4_rejects_ipv6() {
     assert_eq!(global, None);
 }
 
+/// Returns 5,000 `VALUES` rows of `(address, expected bytes as hex, expected family)`.
+/// Every 7th row is NULL, row 0 included. The other rows are IPv4 and IPv6 in turn.
+fn many_rows_sql() -> String {
+    (0..5_000u32)
+        .map(|i| match (i % 7, i % 2) {
+            (0, _) => None,
+            (_, 0) => Some(IpAddr::V4(Ipv4Addr::from(i.wrapping_mul(2_654_435_761)))),
+            _ => Some(IpAddr::V6(Ipv6Addr::from(
+                u128::from(i).wrapping_mul(0x9E37_79B9_7F4A_7C15_F39C_C060_5CED_C835),
+            ))),
+        })
+        .map(|ip| match ip {
+            None => "(NULL, NULL, NULL)".to_string(),
+            Some(ip) => {
+                let (bytes, family) = match ip {
+                    IpAddr::V4(a) => (a.octets().to_vec(), 4),
+                    IpAddr::V6(a) => (a.octets().to_vec(), 6),
+                };
+                let hex: String = bytes.iter().map(|b| format!("{b:02X}")).collect();
+                format!("('{ip}', '{hex}', {family})")
+            }
+        })
+        .collect::<Vec<_>>()
+        .join(", ")
+}
+
+// More rows than one DuckDB vector (2048), with NULLs, so a row that reads another row fails.
+#[test]
+fn ip_functions_many_rows() {
+    let db = open_with_extension_loaded();
+    db.execute_batch(&format!(
+        "CREATE TABLE t (v VARCHAR, bin VARCHAR, family UTINYINT); INSERT INTO t VALUES {}",
+        many_rows_sql()
+    ))
+    .expect("create table");
+    for (actual, expected) in [
+        ("hex(ip_to_binary(v))", "bin"),
+        ("hex(ipv4_to_binary(v))", "CASE family WHEN 4 THEN bin END"),
+        ("hex(ipv6_to_binary(v))", "CASE family WHEN 6 THEN bin END"),
+        ("ip_family(v)", "family"),
+    ] {
+        let wrong: i64 = db
+            .query_one(&format!(
+                "SELECT count(*) FROM t WHERE {actual} IS DISTINCT FROM {expected}"
+            ))
+            .expect("query");
+        assert_eq!(wrong, 0, "{actual}");
+    }
+}
+
 // ── INET-input tests ────────────────────────────────────────────────────────
 //
 // Gated on the `inet-interop` Cargo feature (which also gates the
@@ -221,7 +273,7 @@ fn is_global_ipv4_rejects_ipv6() {
 
 #[cfg(feature = "inet-interop")]
 mod inet {
-    use super::{InMemoryDb, extension_path};
+    use super::{InMemoryDb, extension_path, many_rows_sql};
 
     fn open_with_inet_and_extension_loaded() -> InMemoryDb {
         let db = InMemoryDb::open_unsigned().expect("open in-memory db (unsigned)");
@@ -304,5 +356,20 @@ mod inet {
             .query_one("SELECT is_global_inet('::1'::INET)")
             .expect("query");
         assert!(!global);
+    }
+
+    // Same rows as `ip_functions_many_rows`, read from the INET struct.
+    #[test]
+    fn inet_to_binary_many_rows() {
+        let db = open_with_inet_and_extension_loaded();
+        db.execute_batch(&format!(
+            "CREATE TABLE t (v INET, bin VARCHAR, family UTINYINT); INSERT INTO t VALUES {}",
+            many_rows_sql()
+        ))
+        .expect("create table");
+        let wrong: i64 = db
+            .query_one("SELECT count(*) FROM t WHERE hex(inet_to_binary(v)) IS DISTINCT FROM bin")
+            .expect("query");
+        assert_eq!(wrong, 0);
     }
 }
