@@ -56,7 +56,7 @@ libduckdb-sys = { version = "1.20000", default-features = false, features = [
   "download-lib",
   "loadable-extension",
 ] }
-quack-rs = { version = "0.19", default-features = false }
+quack-rs = { version = "0.20", default-features = false }
 criterion = { version = "0.8", default-features = false }
 proptest = { version = "1", default-features = false, features = ["std"] }
 toml = { version = "1.1", default-features = false, features = [
