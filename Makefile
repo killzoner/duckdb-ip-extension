@@ -19,7 +19,7 @@ WORKDIR    ?= /workdir
 
 LIB_LOCAL_DIR      ?= local_lib
 LIB_DUCKDB_ARCH    ?= linux-amd64
-LIB_DUCKDB_VERSION ?= 2.0.0
+LIB_DUCKDB_VERSION ?= 2.0.1
 # extension-ci-tools has one branch per minor release, named after its codename
 EXTENSION_CI_TOOLS_BRANCH ?= v2.0-cyanoptera
 
